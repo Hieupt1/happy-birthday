@@ -80,19 +80,30 @@
             border-radius: 5px; margin-top: 10px; font-size: 0.9rem; display: none;
         }
 
-        /* --- SLIDESHOW (ĐÃ SỬA LỖI ĐÈ ẢNH) --- */
+        /* --- SLIDESHOW 2 LỚP ẢNH --- */
         #slideshow-screen { padding: 20px; }
         .slide-container {
             width: 100%; 
             height: 350px; 
             display: flex; justify-content: center; align-items: center;
             overflow: hidden; border-radius: 15px; border: 3px solid rgba(255, 255, 255, 0.5);
-            margin-bottom: 15px; background: rgba(0,0,0,0.1); position: relative;
+            margin-bottom: 15px; background: rgba(0,0,0,0.1); 
+            position: relative; 
         }
-        #slideshow-img {
-            max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0;
-            /* Thời gian mờ dần là 1 giây */
-            transition: opacity 1s ease-in-out; 
+
+        .slide-img-layer {
+            position: absolute; 
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: contain;
+            opacity: 0; 
+            transition: opacity 1.5s ease-in-out; 
+            z-index: 0;
+        }
+
+        .slide-img-layer.visible {
+            opacity: 1;
+            z-index: 1; 
         }
         
         #slide-caption { font-style: italic; margin-top: 10px; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
@@ -104,18 +115,29 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2); line-height: 1.2;
         }
         
+        /* CSS CHO LỜI CHÚC HIỆN TỪ TỪ */
         .message { 
             margin: 20px 0; 
             font-size: 1.05rem; 
             line-height: 1.6; 
             padding: 0 15px;
             padding-left: 0;
-            padding-right: 0;
             max-height: 180px; 
             overflow-y: auto; 
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+            
+            /* Ban đầu ẩn đi */
+            opacity: 0;
+            /* Hiệu ứng hiện dần trong 10 giây */
+            transition: opacity 10s ease-in-out;
         }
+        
+        /* Class này kích hoạt hiện chữ */
+        .message.show-text {
+            opacity: 1;
+        }
+
         .message::-webkit-scrollbar { width: 6px; }
         .message::-webkit-scrollbar-track { background: transparent; }
         .message::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.5); border-radius: 10px; }
@@ -179,7 +201,8 @@
     <div class="container-box" id="slideshow-screen">
         <h3> BÉO ❤️</h3>
         <div class="slide-container">
-            <img id="slideshow-img" src="" alt="Memories">
+            <img id="slide-img-1" class="slide-img-layer" src="" alt="Slide 1">
+            <img id="slide-img-2" class="slide-img-layer" src="" alt="Slide 2">
         </div>
         <div id="slide-caption">Đang tải ký ức...</div>
     </div>
@@ -189,7 +212,7 @@
         <div><span class="heart-icon">❤️</span></div>
         <h1>Happy Birthday!</h1>
         
-        <div class="message">
+        <div class="message" id="final-message">
             Chúc mừng sinh nhật Béo của anh! 🎂<br>
             Tuổi mới luôn xinh đẹp, hạnh phúc và rạng rỡ nhé !<br>
             Mong mọi điều tốt đẹp nhất sẽ đến với em.<br>
@@ -228,6 +251,7 @@
         const bgMusic = document.getElementById('bg-music');
         const musicBtn = document.getElementById('musicBtn');
         let isMusicPlaying = false; 
+        let activeLayer = 1;
 
         bgMusic.src = SONG_SLIDESHOW;
 
@@ -241,7 +265,13 @@
             if (password === PASSWORD) {
                 fadeSwitch('login-screen', 'slideshow-screen');
                 playMusic();
-                setTimeout(startSlideshowSequence, 500);
+                
+                try {
+                    startSlideshowSequence();
+                } catch (e) {
+                    console.error("Lỗi slide:", e);
+                    finishSlideshowAndCelebrate(); 
+                }
             } else {
                 errorMsg.style.display = 'block';
                 errorMsg.textContent = "Sai mật khẩu rồi! Gợi ý: Ngày sinh của em";
@@ -281,35 +311,49 @@
             }
         }
 
-        // 3. SLIDESHOW (ĐÃ SỬA LỖI ĐÈ ẢNH)
+        // 3. SLIDESHOW (CHỐNG TREO + MƯỢT)
         function startSlideshowSequence() {
-            const slideImg = document.getElementById('slideshow-img');
             const caption = document.getElementById('slide-caption');
+            
+            const nextLayer = activeLayer === 1 ? 2 : 1;
+            const nextImgEl = document.getElementById(`slide-img-${nextLayer}`);
+            const currentImgEl = document.getElementById(`slide-img-${activeLayer}`);
+
+            if (!nextImgEl || !currentImgEl) {
+                // Nếu không tìm thấy thẻ ảnh, bỏ qua slide luôn
+                finishSlideshowAndCelebrate();
+                return;
+            }
 
             if (currentSlideIndex < imageList.length) {
                 caption.textContent = `Kỷ niệm ${currentSlideIndex + 1} / ${imageList.length}`;
                 
-                // Bước 1: Cho ảnh mờ dần đi
-                slideImg.style.opacity = 0;
+                nextImgEl.src = imageList[currentSlideIndex];
                 
-                shootMiniConfetti();
-
-                // Bước 2: CHỜ 1.2 GIÂY (để CSS 1s chạy xong hẳn) rồi mới đổi ảnh
-                setTimeout(() => {
-                    slideImg.src = imageList[currentSlideIndex];
-                    
-                    slideImg.onload = () => { 
-                        slideImg.style.opacity = 1; // Hiện ảnh mới
-                    };
-                    
-                    // Fallback phòng khi mạng lag
-                    setTimeout(() => { 
-                        slideImg.style.opacity = 1; 
-                    }, 100); 
-
+                // Hàm chạy khi ảnh tải thành công
+                const onImageLoad = () => {
+                    shootMiniConfetti();
+                    nextImgEl.classList.add('visible');
+                    currentImgEl.classList.remove('visible');
+                    activeLayer = nextLayer;
                     currentSlideIndex++;
                     setTimeout(startSlideshowSequence, SLIDE_DURATION);
-                }, 1200); // <-- QUAN TRỌNG: Tăng thời gian chờ lên 1.2s để không bị đè
+                };
+
+                // Hàm chạy khi ảnh bị lỗi (VD: thiếu file) -> Tự động bỏ qua
+                nextImgEl.onerror = () => {
+                    console.log("Lỗi ảnh, bỏ qua: " + imageList[currentSlideIndex]);
+                    currentSlideIndex++;
+                    startSlideshowSequence(); // Gọi đệ quy ngay lập tức
+                };
+                
+                nextImgEl.onload = onImageLoad;
+
+                // Fallback nếu ảnh đã có trong cache
+                if (nextImgEl.complete && nextImgEl.naturalWidth !== 0) {
+                     onImageLoad();
+                }
+
             } else {
                 finishSlideshowAndCelebrate();
             }
@@ -319,6 +363,12 @@
             fadeSwitch('slideshow-screen', 'birthday-screen');
             switchMusic(SONG_FINAL);
             setTimeout(() => { startCelebration(); }, 500);
+
+            // --- KÍCH HOẠT CHỮ HIỆN TỪ TỪ (10s) ---
+            setTimeout(() => {
+                const msgBox = document.getElementById('final-message');
+                if(msgBox) msgBox.classList.add('show-text');
+            }, 1000); // Đợi 1s sau khi màn hình hiện lên thì mới bắt đầu fade chữ
         }
 
         // --- TIỆN ÍCH ---
