@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday! ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS CƠ BẢN --- */
+        :root {
+            --primary-color: #ff758c;
+            --bg-color: #ff7eb3;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh; 
+            height: 100dvh; 
+            overflow: hidden;
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #ff7eb3, #ff758c, #42a1ff);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container-box {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 35px 25px; /* Tăng padding một chút */
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            /* GIỮ NGUYÊN CHIỀU RỘNG */
+            width: 85%; 
+            max-width: 450px;
+            transition: all 0.5s ease;
+            position: absolute;
+            display: none;
+            opacity: 0;
+            z-index: 10;
+            /* Đảm bảo không quá cao so với màn hình điện thoại */
+            max-height: 90vh;
+            overflow-y: auto; /* Cho phép cuộn nếu nội dung quá dài trên màn hình bé */
+            scrollbar-width: none; /* Ẩn thanh cuộn của box chính */
+        }
+        .container-box::-webkit-scrollbar { display: none; }
+
+        /* --- LOGIN --- */
+        #login-screen { display: block; opacity: 1; padding-left: 8px; padding-right: 8px;}
+        #login-screen h2 { font-family: 'Dancing Script', cursive; font-size: 2rem; margin-bottom: 15px; }
+        input[type="password"] {
+            padding: 12px 15px; border-radius: 25px; border: 20px; outline: none; width: 80%;
+            font-size: 16px; text-align: center; margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.9); color: #333;
+        }
+        .btn-style {
+            padding: 12px 35px; border-radius: 25px; border: none; background: #fff;
+            color: var(--primary-color); font-weight: bold; font-size: 16px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .btn-style:active { transform: scale(0.95); }
+        .error-msg {
+            color: #8b0000; background: rgba(255, 200, 200, 0.4); padding: 5px;
+            border-radius: 5px; margin-top: 10px; font-size: 0.9rem; display: none;
+        }
+
+        /* --- SLIDESHOW (ZOOM & CAO HƠN) --- */
+        #slideshow-screen { padding: 20px; }
+        .slide-container {
+            width: 100%; 
+            /* ĐÃ TĂNG CHIỀU CAO KHUNG ẢNH */
+            height: 450px; 
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; border-radius: 15px; border: 3px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px; background: rgba(0,0,0,0.1); position: relative;
+        }
+        #slideshow-img {
+            max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0;
+            transition: opacity 1s ease-in-out, transform 4.5s linear; /* Zoom mượt */
+            transform: scale(1);
+        }
+        .zoom-active { transform: scale(1.15) !important; }
+        #slide-caption { font-style: italic; margin-top: 10px; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+
+        /* --- FINAL SCREEN (LỜI CHÚC DÀI HƠN) --- */
+
+        #birthday-screen  {
+            padding-left: 9px;
+            padding-right: 9px;
+        }
+
+        #birthday-screen h1 {
+            font-family: 'Dancing Script', cursive; font-size: 2.8rem; margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2); line-height: 1.2;
+        }
+        
+        /* CẤU HÌNH KHUNG LỜI CHÚC ĐỂ CHỨA NHIỀU CHỮ */
+        .message { 
+            margin: 20px 0; /* Tăng khoảng cách */
+            font-size: 1.05rem; /* Chữ to hơn xíu */
+            line-height: 1.6; /* Giãn dòng dễ đọc */
+            padding: 0 15px;
+            padding-left: 0;
+            /* Thêm giới hạn chiều cao và thanh cuộn cho lời chúc dài */
+            max-height: 180px; 
+            overflow-y: auto; 
+            /* Tùy chỉnh thanh cuộn cho đẹp */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+        }
+        /* Thanh cuộn cho Webkit (Chrome, Safari) */
+        .message::-webkit-scrollbar { width: 6px; }
+        .message::-webkit-scrollbar-track { background: transparent; }
+        .message::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.5); border-radius: 10px; }
+
+        .final-avatar {
+            width: 120px; height: 120px; /* Avatar to hơn xíu */
+            border-radius: 50%; border: 4px solid #fff;
+            object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: floatAvatar 3s ease-in-out infinite;
+        }
+        @keyframes floatAvatar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* --- MUSIC BTN --- */
+        .music-control-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+        .music-btn {
+            width: 45px; height: 45px; border-radius: 50%; background: rgba(255, 255, 255, 0.3);
+            border: 2px solid #fff; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s; font-size: 20px;
+        }
+        .music-btn.playing {
+            animation: spin 3s linear infinite; background: rgba(255, 255, 255, 0.6); border-color: #ff758c;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- TIM BAY LÊN (STABLE) --- */
+        .heart-icon {
+            font-size: 2.5rem; animation: beat 1s infinite alternate;
+            display: inline-block; margin-bottom: 5px;
+        }
+        @keyframes beat { to { transform: scale(1.2); } }
+
+        .floating-heart {
+            position: fixed; bottom: -10px; color: rgba(255, 255, 255, 0.6);
+            animation: floatUp linear forwards; z-index: 1; pointer-events: none;
+            text-shadow: 0 0 5px #fff;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+        }
+
+        @media (max-width: 380px) {
+            h1 { font-size: 2.2rem !important; }
+            .container-box { padding: 25px 15px; width: 90%; }
+            /* Điều chỉnh chiều cao khung ảnh trên màn hình nhỏ */
+            .slide-container { height: 350px; } 
+            .final-avatar { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-box" id="login-screen">
+        <h2>Xin chào THẢO PHƯƠNG!</h2>
+        <p>Nhập mật khẩu để đón bất ngờ nhé 🎁</p>
+        <input type="password" id="password-input" placeholder="Ngày sinh nhật của Béo (DDMMYYYY)" inputmode="numeric">
+        <br>
+        <button class="btn-style" onclick="checkPassword()">Mở</button>
+        <div class="error-msg" id="error-msg"></div>
+    </div>
+
+    <div class="container-box" id="slideshow-screen">
+        <h3> BÉO ❤️</h3>
+        <div class="slide-container">
+            <img id="slideshow-img" src="" alt="Memories">
+        </div>
+        <div id="slide-caption">Đang tải ký ức...</div>
+    </div>
+
+    <div class="container-box" id="birthday-screen">
+        <img src="images/avatar.jpg" alt="Avatar" class="final-avatar"> 
+        <div><span class="heart-icon">❤️</span></div>
+        <h1>Happy Birthday!</h1>
+        
+        <div class="message">
+            Chúc mừng sinh nhật Béo của anh! 🎂<br>
+            Tuổi mới luôn xinh đẹp, hạnh phúc và rạng rỡ nhé !<br>
+            Mong mọi điều tốt đẹp nhất sẽ đến với em.<br>
+            💕 💕 💕 💕 💕 <br>
+            뽀뽀하다 💋
+        </div>
+
+        <button class="btn-style" onclick="replayEffect()">Bắn pháo hoa 🎆</button>
+    </div>
+
+    <div class="music-control-container">
+        <div class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</div>
+    </div>
+
+    <audio id="bg-music" loop></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        // --- CẤU HÌNH ---
+        const PASSWORD = "01012000"; 
+        const TOTAL_IMAGES = 26;     
+        const SLIDE_DURATION = 4000; 
+        
+        const SONG_SLIDESHOW = "Happy Birthday To You.mp3"; 
+        const SONG_FINAL = "Không Thời Gian.mp3";     
+        
+        const imageList = [];
+        for (let i = 1; i <= TOTAL_IMAGES; i++) {
+            imageList.push(`images/${i}.jpg`);
+        }
+        
+        const vibrantColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff7eb3'];
+
+        let currentSlideIndex = 0;
+        const bgMusic = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('musicBtn');
+        let isMusicPlaying = false; 
+
+        bgMusic.src = SONG_SLIDESHOW;
+
+        // 1. CHECK PASSWORD
+        function checkPassword() {
+            const input = document.getElementById('password-input');
+            const password = input.value;
+            const errorMsg = document.getElementById('error-msg');
+            input.blur();
+
+            if (password === PASSWORD) {
+                fadeSwitch('login-screen', 'slideshow-screen');
+                playMusic();
+                setTimeout(startSlideshowSequence, 500);
+            } else {
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = "Sai mật khẩu rồi! Gợi ý: Ngày sinh của em";
+                shakeElement('login-screen');
+                input.value = ''; 
+            }
+        }
+
+        // 2. LOGIC NHẠC
+        function playMusic() {
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+                musicBtn.classList.add('playing'); 
+                musicBtn.innerHTML = "💿"; 
+            }).catch(error => { console.log("Auto-play blocked"); });
+        }
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                isMusicPlaying = false;
+                musicBtn.classList.remove('playing'); 
+                musicBtn.innerHTML = "🔇"; 
+            } else {
+                bgMusic.play();
+                isMusicPlaying = true;
+                musicBtn.classList.add('playing'); 
+                musicBtn.innerHTML = "💿";
+            }
+        }
+
+        function switchMusic(newSongSrc) {
+            if(isMusicPlaying) {
+                bgMusic.pause(); bgMusic.src = newSongSrc; bgMusic.load(); bgMusic.play();
+            } else {
+                bgMusic.src = newSongSrc;
+            }
+        }
+
+        // 3. SLIDESHOW (ZOOM + CONFETTI)
+        function startSlideshowSequence() {
+            const slideImg = document.getElementById('slideshow-img');
+            const caption = document.getElementById('slide-caption');
+
+            if (currentSlideIndex < imageList.length) {
+                caption.textContent = `Kỷ niệm ${currentSlideIndex + 1} / ${imageList.length}`;
+                
+                slideImg.style.opacity = 0;
+                slideImg.classList.remove('zoom-active'); 
+
+                shootMiniConfetti();
+
+                setTimeout(() => {
+                    slideImg.src = imageList[currentSlideIndex];
+                    slideImg.onload = () => { 
+                        slideImg.style.opacity = 1; 
+                        slideImg.classList.add('zoom-active'); 
+                    };
+                    setTimeout(() => { 
+                        slideImg.style.opacity = 1; 
+                        slideImg.classList.add('zoom-active');
+                    }, 100); 
+
+                    currentSlideIndex++;
+                    setTimeout(startSlideshowSequence, SLIDE_DURATION);
+                }, 800); 
+            } else {
+                finishSlideshowAndCelebrate();
+            }
+        }
+
+        function finishSlideshowAndCelebrate() {
+            fadeSwitch('slideshow-screen', 'birthday-screen');
+            switchMusic(SONG_FINAL);
+            setTimeout(() => { startCelebration(); }, 500);
+        }
+
+        // --- TIỆN ÍCH ---
+        function fadeSwitch(hideId, showId) {
+            const hideEl = document.getElementById(hideId);
+            const showEl = document.getElementById(showId);
+            hideEl.style.opacity = 0;
+            setTimeout(() => {
+                hideEl.style.display = 'none';
+                showEl.style.display = 'block';
+                setTimeout(() => { showEl.style.opacity = 1; }, 50);
+            }, 500);
+        }
+
+        function shakeElement(id) {
+            const element = document.getElementById(id);
+            element.style.transform = "translateX(10px)";
+            setTimeout(() => element.style.transform = "translateX(-10px)", 100);
+            setTimeout(() => element.style.transform = "translateX(0)", 200);
+        }
+
+        // --- FINAL CELEBRATION (TIM BAY NHIỀU + ỔN ĐỊNH) ---
+        function startCelebration() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: vibrantColors, scalar: 1.4 });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: vibrantColors, scalar: 1.4 });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+            
+            setInterval(createHeart, 150); 
+        }
+
+        function shootMiniConfetti() {
+            const config = { scalar: 1.4, colors: vibrantColors, spread: 120, particleCount: 25 };
+            confetti({ ...config, angle: 270, origin: { y: -0.1 }, gravity: 1.2 });
+            confetti({ ...config, angle: 90, origin: { y: 1.1 }, startVelocity: 45 });
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 4 + 3 + 's';
+            heart.style.fontSize = Math.random() * 30 + 15 + 'px'; 
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 7000);
+        }
+
+        function replayEffect() {
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: vibrantColors, scalar: 1.4 });
+        }
+        
+        document.getElementById("password-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") checkPassword();
+        });
+    </script>
+</body>
+</html>
